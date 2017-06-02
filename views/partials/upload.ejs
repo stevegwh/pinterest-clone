@@ -1,0 +1,20 @@
+<div class="title"><h1>Upload a file..</h1></div>
+<div id="upload-wrapper">
+	<%if(session.name) {%>
+	 <form action="/uploadFile" method="POST" enctype="multipart/form-data">
+	 		<hr>
+	 		<h3>From your computer</h3>
+	 		<div>
+				<input type="file" name="file" required="true" class="upload"></input>
+			</div>
+			<h3>From a url</h3>
+			<div>
+				<input type="text" name="fileUrl" placeholder="Enter url.." required="true" class="upload"></input>
+			</div>
+			<hr>
+		<button type="submit">Submit</button>
+	</form>
+	<%}else{%>
+		<div><h2>Sorry, you have to <a href="/login">login</a> to upload a file!</h2></div>
+	<%}%>
+</div>

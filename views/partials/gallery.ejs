@@ -1,0 +1,19 @@
+
+<div id="wrapper" class="container-reponsive">
+	<div id="gallery-wrapper">
+		<%for(var i = result.length - 1; i >= 0 ; i--) {%>
+			<%if(i > (result.length - 1) - pageLimit) {%>
+				<div class="img-holder">
+					<img class="thumbnail img-responsive" src="/upload/<%=result[i].filename%>"/>
+					<div id=<%=result[i].filename%> class="gallery-caption thumbnail right-caption">
+						<div>Submitted by: <%=result[i].submittedby%></div>
+						<%if(session.name) {%>
+						<button class="img-pin btn btn-xs btn-danger">Pin this <span class="icon">&#x1f49b;</span></button>
+						<%}%>
+					</div>
+
+				</div>
+			<%}%>
+		<%}%> 
+	</div>
+</div>

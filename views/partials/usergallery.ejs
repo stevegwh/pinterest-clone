@@ -1,0 +1,23 @@
+<div class="title"><h2><%=title%></h2></div>
+<div id="wrapper" class="container">
+	<div id="gallery-wrapper">
+		<%for(var i = result.length - 1; i >= 0 ; i--) {%>
+			<%if(i > (result.length - 1) - pageLimit) {%>
+				<div class="img-holder">
+					<%if(title === "Your Uploads") {%>											
+					<img class="thumbnail img-responsive" src="/upload/<%=result[i].filename%>"/>
+					<div id=<%=result[i].filename%> class="gallery-caption thumbnail right-caption">
+						<button class="btn btn-xs btn-warning upload-delete">Delete <span class="icon">&#x232b;</span></button>
+					</div>
+					<%} else {%>
+						<img class="thumbnail img-responsive gallery-img" src="/upload/<%=result[i].name%>"/>
+						<div id=<%=result[i].name%> class="gallery-caption thumbnail right-caption">
+							<button class="btn btn-xs btn-warning pin-delete">Remove <span class="icon">&#x232b;</span></button>
+						</div>
+					<%}%>
+				</div>
+
+			<%}%>
+		<%}%> 
+	</div>
+</div>
