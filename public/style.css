@@ -27,14 +27,28 @@ body {
 .disabled {
 	display: none;
 }
+.clicked {
+	opacity: 0.51;
+}
 .gallery-caption {
 	margin-top: auto;
 	margin-bottom: auto;
 	width: 100%;
 }
-.img-holder {
+div.img-holder {
+	position: relative;
 	max-width: 300px;
 	border: solid 1px #F0F0F0;
+}
+div.img-holder:hover button{
+	display: block;
+}
+div.img-holder button {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: none;
+
 }
 .form-disabled {
 	opacity: 0.5;

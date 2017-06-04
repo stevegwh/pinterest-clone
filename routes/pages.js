@@ -1,6 +1,7 @@
 const path = require('path');
 const http = require('http');
 const fs = require('fs');
+const fetch = require('node-fetch');
 let message = "";
 let flashed = false;
 
@@ -38,7 +39,8 @@ exports.uploadFile = (req, res, next) => {
             filename: fileName[fileName.length - 1],
             path: dir + fileName[fileName.length - 1],
             originalname: fileName[fileName.length - 1],
-            submittedby: req.session.name
+            submittedby: req.session.name,
+            description: req.body.description
         }
         download(req.body.fileUrl, dir + fileName[fileName.length - 1], function() {
             sendToGallery(toInsert, res)
@@ -49,7 +51,8 @@ exports.uploadFile = (req, res, next) => {
             filename: req.file.filename,
             path: req.file.path,
             originalname: req.file.originalname,
-            submittedby: req.session.name
+            submittedby: req.session.name,
+            description: req.body.description
         }
         sendToGallery(toInsert, res);
     }
@@ -74,7 +77,7 @@ exports.profile = (req, res) => {
 }
 
 exports.useruploaded = (req, res) => {
-    //console.log(req.session.name)
+    message && !flashed ? flashed = true : (message = "", flashed = false);
     db.collection('gallery').find({ "submittedby": req.session.name }).toArray(function(err, result) {
         if (err) return console.log(err);
         res.render('index.ejs', { title: "Your Uploads", result: result, session: req.session, message: message, page: "partials/usergallery", pageLimit: 10 })
@@ -82,22 +85,44 @@ exports.useruploaded = (req, res) => {
 }
 
 exports.userpinned = (req, res) => {
-    //console.log(req.session.name)
-    db.collection('users').find({ "name": req.session.name }).toArray(function(err, result) {
+    message && !flashed ? flashed = true : (message = "", flashed = false);
+    db.collection('users').find({ "name": req.session.name }).toArray((err, result) => {
         if (err) return console.log(err);
+        for (var i = 0; i < result[0]['likes'].length; i++) {
+            let file = result[0]['likes'][i].filename;
+            fs.exists('../public/upload/' + file, (exists) => {
+                if (!exists) {
+                    db.collection('users').update({ "name": req.session.name }, { $pull: { likes: { "filename": file } } }, (err, result) => {
+                        if (err) return res.send(500, err)
+                    })
+                }
+            });
+        }
         res.render('index.ejs', { title: "Pinned Images", result: result[0]['likes'], session: req.session, message: message, page: "partials/usergallery", pageLimit: 10 })
     })
 }
 
 exports.pinImage = (req, res) => {
-    const img = { "name": req.body.img };
+    const file = { "filename": req.body.file };
+    console.log(file)
     const name = req.body.name;
     db.collection('users')
-        .findOneAndUpdate({ "name": name }, { $addToSet: { likes: img } }, (err, result) => {
-            if (err) return res.send(err)
+        .findOneAndUpdate({ "name": name }, { $addToSet: { likes: file } }, (err, result) => {
+            if (err) return res.send(500, err)
             res.send(result);
         })
 
+}
+
+exports.removePin = (req, res) => {
+    const file = { "filename": req.body.file };
+    console.log(file)
+    const name = req.body.name;
+
+    db.collection('users').update({ "name": name }, { $pull: { likes: file } }, (err, result) => {
+        if (err) return res.send(500, err)
+        res.send(result)
+    })
 }
 
 exports.deleteUpload = (req, res) => {
@@ -105,16 +130,8 @@ exports.deleteUpload = (req, res) => {
     db.collection('gallery')
         .findOneAndDelete({ "filename": file }, (err, result) => {
             if (err) return res.send(500, err)
-            res.send(result)
+            fs.unlink("public/upload/" + file, function() {
+                res.send(result);
+            });
         })
-}
-
-exports.removePin = (req, res) => {
-    const img = { "name": req.body.file };
-    const name = req.body.name;
-
-    db.collection('users').update({ "name": name }, { $pull: { likes: img } }, (err, result) => {
-        if (err) return res.send(500, err)
-        res.send(result)
-    })
 }

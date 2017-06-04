@@ -29,27 +29,6 @@ jQuery(document).ready(function($) {
         $(this).removeClass('form-disabled').prop('required', true);
     })
 
-    $('.img-pin').on('click', function() {
-        var img = $(this).parent().attr('id');
-        var name = $('#username').text();
-        var that = this;
-
-        fetch('pinImage', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                'name': name,
-                'img': img
-            })
-        }).then(function(res) {
-            if (res.ok) {
-                $(that).prop('disabled', 'disabled');
-            } else {
-                console.log("error");
-            }
-        })
-    })
-
     $('.upload-delete').on('click', function() {
         var file = $(this).parent().attr('id');
         fetch('deleteUpload', {
@@ -66,10 +45,13 @@ jQuery(document).ready(function($) {
         })
     });
 
-    $('.pin-delete').on('click', function() {
+    $('.pin').on('click', function() {
         var name = $('#username').text();
         var file = $(this).parent().attr('id');
-        fetch('removePin', {
+        var that = this;
+        var loc = window.location.href.split("/");
+        var command = $(that).hasClass('pin-delete') ? 'removePin' : 'pinImage';
+        fetch(command, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -78,9 +60,14 @@ jQuery(document).ready(function($) {
             })
         }).then(function(res) {
             if (res.ok) {
+                if (loc[loc.length - 1] === "userpinned")
+                    window.location.reload()
 
-                window.location.reload();
+                $(that).hasClass('pin-delete') ? $(that).removeClass('pin-delete clicked').addClass('pin-add') : $(that).removeClass('pin-add').addClass('pin-delete clicked');
+            } else {
+                console.log("error");
             }
         })
     })
+
 })
